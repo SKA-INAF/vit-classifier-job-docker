@@ -160,12 +160,12 @@ PREPROC_OPTS="$ZSCALE_STRETCH --zscale_contrast=$ZSCALE_CONTRAST "
 
 if [ "$MODEL" = "smorphclass_multilabel" ]; then
 
-	MODELFILE="$MODEL_DIR/smorphclass_multilabel/siglip-so400m-patch14-384"
+	MODELFILE="$MODEL_DIR/smorphclass_multilabel/siglip-large-patch16-256"
 	CLASS_OPTS="--multilabel --label_schema=morph_tags --skip_first_class "
 
 elif [ "$MODEL" = "smorphclass_singlelabel_rgz" ]; then
 
-	MODELFILE="$MODEL_DIR/smorphclass_singlelabel_rgz/siglip-so400m-patch14-384"
+	MODELFILE="$MODEL_DIR/smorphclass_singlelabel_rgz/siglip-large-patch16-256"
 	CLASS_OPTS="--label_schema=morph_class "
 	
 else 
@@ -248,6 +248,14 @@ generate_exec_script(){
 				echo "  cp *.dat $JOB_OUTDIR"
 				echo "fi"
 
+				echo " "
+				
+				echo 'tab_count=`ls -1 *.json 2>/dev/null | wc -l`'
+				echo 'if [ $tab_count != 0 ] ; then'
+				echo "  echo \"INFO: Copying output json file(s) to $JOB_OUTDIR ...\""
+				echo "  cp *.json $JOB_OUTDIR"
+				echo "fi"
+				
 				echo " "
 		
 				echo "# - Show output directory"
