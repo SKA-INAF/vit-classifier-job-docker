@@ -20,7 +20,8 @@ if [ "$NARGS" -lt 1 ]; then
 	echo "==    ARGUMENT LIST     =="
 	echo "=========================="
 	echo "*** MANDATORY ARGS ***"
-	echo "--inputfile=[FILENAME] - Input file name (.json) containing images to be processed."
+	echo "--inputfile=[FILENAME] - Input image (FITS/PNG). Takes precedence over --datalist."
+	echo "--datalist=[FILENAME] - Input filename (.json) containing images to be processed."
 	
 	echo ""
 
@@ -62,6 +63,8 @@ JOB_OUTDIR=""
 SCRIPT_DIR="/opt/conda/bin"
 MODEL_DIR="/opt/models"
 
+INPUTFILE=""
+INPUTFILE_GIVEN=false
 DATALIST=""
 DATALIST_GIVEN=false
 
@@ -82,6 +85,12 @@ do
 	case $item in 
 		## MANDATORY ##	
     --inputfile=*)
+    	INPUTFILE=`echo $item | /bin/sed 's/[-a-zA-Z0-9]*=//'`		
+			if [ "$INPUTFILE" != "" ]; then
+				INPUTFILE_GIVEN=true
+			fi
+    ;;
+    --datalist=*)
     	DATALIST=`echo $item | /bin/sed 's/[-a-zA-Z0-9]*=//'`		
 			if [ "$DATALIST" != "" ]; then
 				DATALIST_GIVEN=true
@@ -136,8 +145,8 @@ done
 
 
 ## Check arguments parsed
-if [ "$DATALIST_GIVEN" = false ]; then
-  echo "ERROR: Missing or empty DATALIST args (hint: you must specify it)!"
+if [ "$DATALIST_GIVEN" = false ] && [ "$INPUTFILE_GIVEN" = false ]; then
+  echo "ERROR: Missing or empty DATALIST & INPUTFILE args (hint: you must specify at least one)!"
   exit 1
 fi
 
@@ -180,6 +189,9 @@ fi
 # - Set shfile
 shfile="run_predict.sh"
 
+# - Set log file
+logfile="out.log"
+
 generate_exec_script(){
 
 	local shfile=$1
@@ -208,7 +220,7 @@ generate_exec_script(){
       echo 'echo "*************************************************"'
 				
 			EXE="python $SCRIPT_DIR/run.py" 
-			ARGS="--predict --datalist=$DATALIST $PREPROC_OPTS --modelfile=$MODELFILE $CLASS_OPTS "
+			ARGS="--predict --inputfile=$INPUTFILE --datalist=$DATALIST $PREPROC_OPTS --modelfile=$MODELFILE $CLASS_OPTS "
 			CMD="$EXE $ARGS"
 
 			echo "date"
@@ -254,6 +266,14 @@ generate_exec_script(){
 				echo 'if [ $tab_count != 0 ] ; then'
 				echo "  echo \"INFO: Copying output json file(s) to $JOB_OUTDIR ...\""
 				echo "  cp *.json $JOB_OUTDIR"
+				echo "fi"
+				
+				echo " "
+				
+				echo 'tab_count=`ls -1 *.log 2>/dev/null | wc -l`'
+				echo 'if [ $tab_count != 0 ] ; then'
+				echo "  echo \"INFO: Copying output log file(s) to $JOB_OUTDIR ...\""
+				echo "  cp *.log $JOB_OUTDIR"
 				echo "fi"
 				
 				echo " "
