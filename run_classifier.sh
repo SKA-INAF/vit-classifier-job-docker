@@ -48,7 +48,7 @@ if [ "$NARGS" -lt 1 ]; then
 	echo "--waitcopy - Wait a bit after copying output files to output dir (default=no)"
 	echo "--copywaittime=[COPY_WAIT_TIME] - Time to wait after copying output files (default=30)"
 	echo "--no-logredir - Do not redirect logs to output file in script "	
-	
+	echo "--save-base-path - Save base file paths in output file "	
 	echo "=========================="
   exit 1
 fi
@@ -72,6 +72,7 @@ RUN_SCRIPT=false
 WAIT_COPY=false
 COPY_WAIT_TIME=30
 REDIRECT_LOGS=true
+SAVE_BASE_PATH_OPT=""
 
 MODEL="smorphclass_multilabel"
 
@@ -122,7 +123,9 @@ do
     --no-logredir*)
 			REDIRECT_LOGS=false
 		;;
-    
+    --save-base-path*)
+			SAVE_BASE_PATH_OPT="--save_base_path"
+		;;
     --model=*)
     	MODEL=`echo $item | sed 's/[-a-zA-Z0-9]*=//'`
     ;;
@@ -220,7 +223,7 @@ generate_exec_script(){
       echo 'echo "*************************************************"'
 				
 			EXE="python $SCRIPT_DIR/run.py" 
-			ARGS="--predict --inputfile=$INPUTFILE --datalist=$DATALIST $PREPROC_OPTS --modelfile=$MODELFILE $CLASS_OPTS "
+			ARGS="--predict --inputfile=$INPUTFILE --datalist=$DATALIST $PREPROC_OPTS --modelfile=$MODELFILE $CLASS_OPTS $SAVE_BASE_PATH_OPT "
 			CMD="$EXE $ARGS"
 
 			echo "date"
