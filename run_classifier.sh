@@ -34,9 +34,11 @@ if [ "$NARGS" -lt 1 ]; then
 	#echo "--resize - Resize input image before model processor. If false the model processor will resize anyway to its image size "
 	#echo "--imgsize=[IMGSIZE] - Size in pixels used for image resize"
 	echo "--zscale - Apply zscale transform to each image channel"
-	echo "--zscale_contrast=[CONTRAST] - zscale transform contrast parameters (default=0.25)"
+	echo "--zscale-contrast=[CONTRAST] - zscale transform contrast parameters (default=0.25)"
 	#echo "--grayscale - Load input images in grayscale (1 chan tensor)"
-			
+	echo "--norm-min=[NORM_MIN] - MinMax normalization min value (default=0.0)"
+	echo "--norm-max=[NORM_MAX] - MinMax normalization max value (default=1.0)"
+	
 	echo ""
 	
 	echo "=== RUN OPTIONS ==="
@@ -80,6 +82,8 @@ MODEL="smorphclass_multilabel"
 #RESIZE=""
 ZSCALE_STRETCH=""
 ZSCALE_CONTRAST="0.25"
+NORM_MIN=0
+NORM_MAX=1
 
 for item in "$@"
 do
@@ -136,7 +140,12 @@ do
 		--zscale-contrast*)
     	ZSCALE_CONTRAST=`echo $item | sed 's/[-a-zA-Z0-9]*=//'`
     ;;
-		
+		--norm-min=*)
+    	NORM_MIN=`echo $item | /bin/sed 's/[-a-zA-Z0-9]*=//'`
+    ;;
+    --norm-max=*)
+    	NORM_MAX=`echo $item | /bin/sed 's/[-a-zA-Z0-9]*=//'`
+    ;;
     
     *)
     # Unknown option
@@ -168,7 +177,7 @@ fi
 #######################################
 ##   SET CLASSIFIER OPTIONS
 #######################################
-PREPROC_OPTS="$ZSCALE_STRETCH --zscale_contrast=$ZSCALE_CONTRAST "
+PREPROC_OPTS="$ZSCALE_STRETCH --zscale_contrast=$ZSCALE_CONTRAST --norm_min=$NORM_MIN --norm_max=$NORM_MAX "
 
 if [ "$MODEL" = "smorphclass_multilabel" ]; then
 
@@ -179,12 +188,17 @@ elif [ "$MODEL" = "smorphclass_singlelabel_rgz" ]; then
 
 	MODELFILE="$MODEL_DIR/smorphclass_singlelabel_rgz/siglip-large-patch16-256"
 	CLASS_OPTS="--label_schema=morph_class "
+
+elif [ "$MODEL" = "smorphclass_singlelabel_lotss" ]; then
+	MODELFILE="$MODEL_DIR/smorphclass_singlelabel_lotss-dr2-horton/resnet18"
+	CLASS_OPTS="--label_schema=rg_morph "
 	
 else 
 	echo "ERROR: Unknown/not supported MODEL argument $MODEL given!"
   exit 1
 fi
 
+RUN_OPTS="--report_to=none "
 
 #######################################
 ##   DEFINE GENERATE EXE SCRIPT FCN
@@ -223,7 +237,7 @@ generate_exec_script(){
       echo 'echo "*************************************************"'
 				
 			EXE="python $SCRIPT_DIR/run.py" 
-			ARGS="--predict --inputfile=$INPUTFILE --datalist=$DATALIST $PREPROC_OPTS --modelfile=$MODELFILE $CLASS_OPTS $SAVE_BASE_PATH_OPT "
+			ARGS="--predict --inputfile=$INPUTFILE --datalist=$DATALIST $PREPROC_OPTS --modelfile=$MODELFILE $CLASS_OPTS $SAVE_BASE_PATH_OPT $RUN_OPTS "
 			CMD="$EXE $ARGS"
 
 			echo "date"
