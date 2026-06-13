@@ -180,18 +180,20 @@ fi
 PREPROC_OPTS="$ZSCALE_STRETCH --zscale_contrast=$ZSCALE_CONTRAST --norm_min=$NORM_MIN --norm_max=$NORM_MAX "
 
 if [ "$MODEL" = "smorphclass_multilabel" ]; then
-
 	MODELFILE="$MODEL_DIR/smorphclass_multilabel/siglip-large-patch16-256"
 	CLASS_OPTS="--multilabel --label_schema=morph_tags --skip_first_class "
 
 elif [ "$MODEL" = "smorphclass_singlelabel_rgz" ]; then
-
 	MODELFILE="$MODEL_DIR/smorphclass_singlelabel_rgz/siglip-large-patch16-256"
 	CLASS_OPTS="--label_schema=morph_class "
 
 elif [ "$MODEL" = "smorphclass_singlelabel_lotss" ]; then
 	MODELFILE="$MODEL_DIR/smorphclass_singlelabel_lotss-dr2-horton/resnet18"
 	CLASS_OPTS="--label_schema=rg_morph "
+	
+elif [ "$MODEL" = "anomalyclass_singlelabel" ]; then
+	MODELFILE="$MODEL_DIR/models/anomalyclass_singlelabel/siglip-so400m-patch14-384"
+	CLASS_OPTS="--label_schema=anomaly_class "
 	
 else 
 	echo "ERROR: Unknown/not supported MODEL argument $MODEL given!"
