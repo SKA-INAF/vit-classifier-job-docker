@@ -192,8 +192,16 @@ elif [ "$MODEL" = "smorphclass_singlelabel_lotss" ]; then
 	CLASS_OPTS="--label_schema=rg_morph "
 	
 elif [ "$MODEL" = "anomalyclass_singlelabel" ]; then
-	MODELFILE="$MODEL_DIR/models/anomalyclass_singlelabel/siglip-so400m-patch14-384"
+	MODELFILE="$MODEL_DIR/anomalyclass_singlelabel/siglip-so400m-patch14-384"
 	CLASS_OPTS="--label_schema=anomaly_class "
+	
+elif [ "$MODEL" = "artefactdet_singlelabel" ]; then
+	MODELFILE="$MODEL_DIR/artefactdet_singlelabel/siglip-so400m-patch14-384"
+	CLASS_OPTS="--label_schema=binary_qa "
+	
+elif [ "$MODEL" = "radiogaldet_singlelabel" ]; then
+	MODELFILE="$MODEL_DIR/radiogaldet_singlelabel/siglip-so400m-patch14-384"
+	CLASS_OPTS="--label_schema=binary_qa "
 	
 else 
 	echo "ERROR: Unknown/not supported MODEL argument $MODEL given!"
