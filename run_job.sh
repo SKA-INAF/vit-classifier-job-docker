@@ -12,6 +12,9 @@ JOB_OUTDIR=""
 JOB_ARGS=""
 INPUTFILE=""
 
+# - CONTAINER RUN MODE (image or catalog)
+APP_MODE="image"
+
 # - RCLONE OPTIONS
 MOUNT_RCLONE_VOLUME=0
 MOUNT_VOLUME_PATH="/mnt/storage"
@@ -48,6 +51,9 @@ do
 		--inputfile=*)
     	INPUTFILE=`echo $item | /bin/sed 's/[-a-zA-Z0-9]*=//'`
     ;;
+		--app-mode=*)
+			APP_MODE=`echo $item | /bin/sed 's/[-a-zA-Z0-9]*=//'`
+		;;    
 		--mount-rclone-volume=*)
     	MOUNT_RCLONE_VOLUME=`echo $item | /bin/sed 's/[-a-zA-Z0-9]*=//'`
     ;;
@@ -170,8 +176,14 @@ JOB_OPTIONS="$RUN_OPTIONS $DATA_OPTIONS $JOB_ARGS "
 ###############################
 
 # - Define run command & args
-#EXE="python3 /usr/local/bin/run_classifier_nn.py"
-EXE="/home/$RUNUSER/run_classifier.sh"
+####EXE="python3 /usr/local/bin/run_classifier_nn.py"
+#EXE="/home/$RUNUSER/run_classifier.sh"
+
+if [ "$APP_MODE" = "catalog" ] ; then
+	EXE="/home/$RUNUSER/run_classifier_on_catalog.sh"
+else
+	EXE="/home/$RUNUSER/run_classifier.sh"
+fi
 
 if [ "$CHANGE_USER" = true ]; then
 	CMD="runuser -l $RUNUSER -g $RUNUSER -c'""$EXE $JOB_OPTIONS""'"
