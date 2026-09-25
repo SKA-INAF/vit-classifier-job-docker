@@ -10,7 +10,7 @@ CHANGE_USER=true
 JOB_DIR=""
 JOB_OUTDIR=""
 JOB_ARGS=""
-INPUTFILE=""
+##INPUTFILE=""
 
 # - CONTAINER RUN MODE (image or catalog)
 APP_MODE="image"
@@ -48,9 +48,9 @@ do
 		--jobargs=*)
     	JOB_ARGS=`echo "$item" | /bin/sed 's/[-a-zA-Z0-9]*=//'`
     ;;
-		--inputfile=*)
-    	INPUTFILE=`echo $item | /bin/sed 's/[-a-zA-Z0-9]*=//'`
-    ;;
+##		--inputfile=*)
+##    	INPUTFILE=`echo $item | /bin/sed 's/[-a-zA-Z0-9]*=//'`
+##    ;;
 		--app-mode=*)
 			APP_MODE=`echo $item | /bin/sed 's/[-a-zA-Z0-9]*=//'`
 		;;    
@@ -84,13 +84,9 @@ done
 
 # - Check options
 if [ "$JOB_ARGS" = "" ]; then
-	if [ "$INPUTFILE" = "" ]; then
-	  echo "ERROR: Empty INPUTFILE argument (hint: you must specify an input file path)!"
-	  exit 1
-	fi
+	echo "ERROR: Empty JOB_ARGS argument!"
+	exit 1
 fi
-
-
 
 ###############################
 ##    MOUNT VOLUMES
@@ -154,10 +150,10 @@ if [ "$JOB_DIR" == "" ]; then
 fi
 
 # - Set options
-DATA_OPTIONS=""
-if [ "$INPUTFILE" != "" ]; then
-	DATA_OPTIONS="--inputfile=$INPUTFILE "
-fi
+#DATA_OPTIONS=""
+#if [ "$INPUTFILE" != "" ]; then
+#	DATA_OPTIONS="--inputfile=$INPUTFILE "
+#fi
 
 RUN_OPTIONS="--run --jobdir=$JOB_DIR "
 if [ "$JOB_OUTDIR" != "" ]; then
@@ -167,7 +163,8 @@ if [ "$JOB_OUTDIR" != "" ]; then
 	fi	
 fi
 
-JOB_OPTIONS="$RUN_OPTIONS $DATA_OPTIONS $JOB_ARGS "
+#JOB_OPTIONS="$RUN_OPTIONS $DATA_OPTIONS $JOB_ARGS "
+JOB_OPTIONS="$RUN_OPTIONS $JOB_ARGS "
 
 
 
