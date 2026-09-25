@@ -27,7 +27,7 @@ if [ "$NARGS" -lt 1 ]; then
 
 	echo "*** OPTIONAL ARGS ***"
 	echo "=== MODEL OPTIONS ==="
-	echo "--model=[MODEL] - Classifier model to be used in prediction. Options are {smorphclass_multilabel}. Default: smorphclass_multilabel"
+	echo "--model=[MODEL] - Classifier model to be used in prediction. Options are {smorphclass_multilabel, smorphclass_singlelabel_rgz, smorphclass_singlelabel_lotss, anomalyclass_singlelabel, artefactdet_singlelabel, radiogaldet_singlelabel}. Default: smorphclass_multilabel"
 	echo ""
 	
 	echo "=== PRE-PROCESSING OPTIONS ==="
@@ -134,12 +134,14 @@ do
     	MODEL=`echo $item | sed 's/[-a-zA-Z0-9]*=//'`
     ;;
     
-		--zscale*)
-    	ZSCALE_STRETCH="--zscale"
-    ;;
-		--zscale-contrast*)
-    	ZSCALE_CONTRAST=`echo $item | sed 's/[-a-zA-Z0-9]*=//'`
-    ;;
+		## NB: Put zscale contrast first
+    --zscale-contrast=*)
+			ZSCALE_CONTRAST=`echo $item | sed 's/[-a-zA-Z0-9]*=//'`
+		;;
+		--zscale)
+			ZSCALE_STRETCH="--zscale"
+		;;
+    
 		--norm-min=*)
     	NORM_MIN=`echo $item | /bin/sed 's/[-a-zA-Z0-9]*=//'`
     ;;
@@ -226,7 +228,7 @@ generate_exec_script(){
 	
 	echo "INFO: Creating sh file $shfile ..."
 	( 
-			echo "#!/bin/bash -e"
+			echo "#!/bin/bash"
 			
       echo " "
       echo " "

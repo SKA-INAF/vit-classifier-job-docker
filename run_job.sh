@@ -186,7 +186,8 @@ else
 fi
 
 if [ "$CHANGE_USER" = true ]; then
-	CMD="runuser -l $RUNUSER -g $RUNUSER -c'""$EXE $JOB_OPTIONS""'"
+	##CMD="runuser -l $RUNUSER -g $RUNUSER -c'""$EXE $JOB_OPTIONS""'"
+	CMD="runuser -l $RUNUSER -g $RUNUSER -c \"$EXE $JOB_OPTIONS\""
 else
 	CMD="$EXE $JOB_OPTIONS"
 fi
