@@ -20,14 +20,14 @@ if [ "$NARGS" -lt 1 ]; then
 	echo "==    ARGUMENT LIST     =="
 	echo "=========================="
 	echo "*** MANDATORY ARGS ***"
-	echo "--inputfile=[FILENAME] - Input image (FITS/PNG). Takes precedence over --datalist."
-	echo "--datalist=[FILENAME] - Input filename (.json) containing images to be processed."
+	echo "--inputfile=[FILENAME] - Input astronomical image (FITS/PNG/JPG)."
+	echo "--catalogfile=[FILENAME] - Input JSON source catalog associated with the image."
 	
 	echo ""
 
 	echo "*** OPTIONAL ARGS ***"
 	echo "=== MODEL OPTIONS ==="
-	echo "--model=[MODEL] - Classifier model to be used in prediction. Options are {smorphclass_multilabel}. Default: smorphclass_multilabel"
+	echo "--model=[MODEL] - Classifier model to be used in prediction. Options are {smorphclass_singlelabel_rgz, smorphclass_singlelabel_lotss}. Default: smorphclass_singlelabel_rgz"
 	echo ""
 	
 	echo "=== PRE-PROCESSING OPTIONS ==="
@@ -74,10 +74,13 @@ CATALOGFILE=""
 CATALOGFILE_GIVEN=false
 CATALOG_LEVEL="auto"
 COORDINATE_MODE="auto"
-SIZE_MODE="auto"
-CUTOUT_SIZE=128
+#SIZE_MODE="auto"
+SIZE_MODE="bbox_factor"
+##CUTOUT_SIZE=128
+CUTOUT_SIZE=32
 CUTOUT_SIZE_ARCSEC=""
-CUTOUT_MARGIN=10
+##CUTOUT_MARGIN=10
+CUTOUT_MARGIN=0
 CUTOUT_MARGIN_FACTOR=1.2
 SAVE_CUTOUTS=""
 OVERWRITE_CLASS_FIELDS=""
@@ -88,7 +91,7 @@ COPY_WAIT_TIME=30
 REDIRECT_LOGS=true
 SAVE_BASE_PATH_OPT=""
 
-MODEL="smorphclass_multilabel"
+MODEL="smorphclass_singlelabel_rgz"
 
 #IMGSIZE=224
 #RESIZE=""
@@ -184,12 +187,14 @@ do
     	MODEL=`echo $item | sed 's/[-a-zA-Z0-9]*=//'`
     ;;
     
-		--zscale*)
-    	ZSCALE_STRETCH="--zscale"
-    ;;
-		--zscale-contrast*)
-    	ZSCALE_CONTRAST=`echo $item | sed 's/[-a-zA-Z0-9]*=//'`
-    ;;
+    ## NB: Put zscale contrast first
+    --zscale-contrast=*)
+			ZSCALE_CONTRAST=`echo $item | sed 's/[-a-zA-Z0-9]*=//'`
+		;;
+		--zscale)
+			ZSCALE_STRETCH="--zscale"
+		;;
+    
 		--norm-min=*)
     	NORM_MIN=`echo $item | /bin/sed 's/[-a-zA-Z0-9]*=//'`
     ;;
@@ -269,8 +274,6 @@ if [ "$CUTOUT_SIZE_ARCSEC" != "" ]; then
 	CATALOG_OPTS="$CATALOG_OPTS --cutout_size_arcsec=$CUTOUT_SIZE_ARCSEC "
 fi
 
-#RUN_OPTS="--report_to=none "
-
 #######################################
 ##   DEFINE GENERATE EXE SCRIPT FCN
 #######################################
@@ -287,7 +290,7 @@ generate_exec_script(){
 	
 	echo "INFO: Creating sh file $shfile ..."
 	( 
-			echo "#!/bin/bash -e"
+			echo "#!/bin/bash"
 			
       echo " "
       echo " "
@@ -308,7 +311,7 @@ generate_exec_script(){
       echo 'echo "*************************************************"'
 				
 			EXE="python $SCRIPT_DIR/run_classifier_on_catalog.py"
-			ARGS="--inputfile=$INPUTFILE $CATALOG_OPTS $PREPROC_OPTS --model=$MODELFILE $CLASS_OPTS $SAVE_BASE_PATH_OPT $RUN_OPTS --outfile=$OUTFILE "
+			ARGS="--inputfile=$INPUTFILE $CATALOG_OPTS $PREPROC_OPTS --model=$MODELFILE $CLASS_OPTS $SAVE_BASE_PATH_OPT --outfile=$OUTFILE "
 			
 			CMD="$EXE $ARGS"
 
